@@ -113,4 +113,4 @@ npm start
 
 ## Contact
 
-For any questions or issues, feel free to open an issue or reach out via email at [your.email@example.com](mailto:your.email@example.com).
+For any questions or issues, feel free to open an issue or reach out via email at [phonganbundau@gmail.com](mailto:phonganbundau@gmail.com).
