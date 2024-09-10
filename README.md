@@ -24,7 +24,7 @@ This is a decentralized application (DApp) built on the Ethereum blockchain that
    - During the lease period, the tenant can transfer the token to another address, allowing further flexibility in ownership.
 
 4. **Automatic Lease Activation**:
-   - The token is automatically transferred to the tenant's wallet when the lease period begins. This process can be automated via a backend service or by integrating with Chainlink Keepers to ensure seamless transfers.
+   - The token is automatically transferred to the tenant's wallet when the lease period begins.
 
 5. **Reclaiming Tokens**:
    - Once the lease period ends, the original owner can reclaim the token. This process can be automated or manually initiated by the owner.
