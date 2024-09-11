@@ -17,17 +17,15 @@ This is a decentralized application (DApp) built on the Ethereum blockchain that
    - Property owners can mint a new token representing a property. The owner must input the property details, including address, area, number of rooms, and daily rent price. The token is stored as an ERC721 NFT on the Ethereum blockchain.
 
 2. **Renting Properties**:
-   - Users can rent properties for a specific time period. The DApp ensures that the token is only transferred when the lease period begins, and the token will remain with the tenant during the lease period. The original owner cannot reclaim the token until the lease period ends.
+   - Users can rent properties for a specific time period. The DApp ensures that the token is transferred, and the token will remain with the tenant during the lease period. The original owner cannot reclaim the token until the lease period ends.
    - The rental payment is handled in ETH.
 
 3. **Token Transfers**:
    - During the lease period, the tenant can transfer the token to another address, allowing further flexibility in ownership.
 
-4. **Automatic Lease Activation**:
-   - The token is automatically transferred to the tenant's wallet when the lease period begins. This process can be automated via a backend service or by integrating with Chainlink Keepers to ensure seamless transfers.
 
-5. **Reclaiming Tokens**:
-   - Once the lease period ends, the original owner can reclaim the token. This process can be automated or manually initiated by the owner.
+4. **Reclaiming Tokens**:
+   - Once the lease period ends, the original owner can reclaim the token. 
 
 ## Tech Stack
 
@@ -42,14 +40,9 @@ The smart contract follows the ERC721 standard with additional functionality for
 
 - `mint`: Mint a new NFT representing a property with metadata.
 - `rentToken`: Allows a user to rent the property for a specified time period.
-- `activateLease`: Transfers the token to the tenant when the lease starts.
 - `reclaimToken`: Reclaims the token after the lease period ends.
 
-### Key Functions
 
-- `rentToken`: Users can rent a property by specifying a time period and making the required payment in ETH. The contract checks for available times and ensures no double booking occurs.
-- `activateLease`: Once the lease starts, the tenant can call this function (or it can be automatically called using Chainlink Keepers) to transfer the token to their wallet.
-- `reclaimToken`: The original owner can reclaim their token after the lease period has ended.
 
 ## Setup Instructions
 
@@ -113,4 +106,4 @@ npm start
 
 ## Contact
 
-For any questions or issues, feel free to open an issue or reach out via email at [phonganbundau@gmail.com](mailto:phonganbundau@gmail.com).
+For any questions or issues, feel free to open an issue or reach out via email at [phonganbundau@gmail.com](mailto:phonganbundau@gmail.com) or [trantattri@gmail.com](mailto:trantattri@gmail.com).
