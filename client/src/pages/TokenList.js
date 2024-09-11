@@ -147,10 +147,6 @@ const TokenList = () => {
                   <CardContent>
                     <Typography gutterBottom variant="h6">{token.name}</Typography>
                     <Typography variant="body2" color="textSecondary">Token ID: {token.tokenId}</Typography>
-                    <Typography variant="body2" color="textSecondary">
-                    Rent Period: from {formatTimestamp(token.startTime)} to {formatTimestamp(token.endTime)}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">Time Remaining: {token.timeRemaining > 0 ? formatTimeRemaining(token.timeRemaining) : 'Lease Expired'}</Typography>
                   </CardContent>
                 </Card>
               </Grid2>

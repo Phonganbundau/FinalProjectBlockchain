@@ -34,7 +34,7 @@ contract TimeLimitedOwnership is ERC721Enumerable, Ownable {
         // Lưu chủ sở hữu ban đầu khi mint token
         originalOwner[tokenId] = to;
 
-        // Đặt giá thuê mặc định theo ngày
+
         leasePeriods[tokenId] = LeasePeriod(0, 0, pricePerDay, address(0));
         
     }
@@ -70,14 +70,17 @@ contract TimeLimitedOwnership is ERC721Enumerable, Ownable {
         return tokens;
     }
 
-    // Người thuê gọi hàm này để thuê token với thời gian sở hữu giới hạn và thanh toán theo ngày
-    function rentToken(uint256 tokenId, uint256 _startTime, uint256 _endTime) public payable {
+// Người thuê gọi hàm này để thuê token với thời gian sở hữu giới hạn và thanh toán theo ngày
+ function rentToken(uint256 tokenId, uint256 _startTime, uint256 _endTime) public payable {
     require(ownerOf(tokenId) != msg.sender, "You are already the owner of this token.");
     require(_startTime < _endTime, "Start time must be before end time.");
     require(block.timestamp <= _startTime, "Start time is in the past.");
     
-    // Kiểm tra nếu token đang được thuê và chưa hết hạn
-    require(leasePeriods[tokenId].endTime == 0 || block.timestamp > leasePeriods[tokenId].endTime, "Token is still rented by someone else.");
+    // Kiểm tra thời gian thuê mới không chồng chéo với thời gian thuê hiện tại
+    require(
+        leasePeriods[tokenId].endTime == 0 || _startTime > leasePeriods[tokenId].endTime,
+        "Token is still rented by someone else during the requested period."
+    );
 
     // Tính số ngày thuê
     uint256 numberOfDays = (_endTime - _startTime) / 1 days;
@@ -94,6 +97,7 @@ contract TimeLimitedOwnership is ERC721Enumerable, Ownable {
     address owner = originalOwner[tokenId];
     payable(owner).transfer(msg.value);
 }
+
 
 event LeaseActivated(uint256 tokenId, address renter);
 // Chuyển token cho người thuê khi thời gian thuê bắt đầu
@@ -124,7 +128,7 @@ function activateLease(uint256 tokenId) public {
         leasePeriods[tokenId].renter = to;
     }
 
-    // Đặt giá thuê mỗi ngày cho tài sản
+    // Đặt giá thuê mỗi ngày cho tài sản (chưa triển khai UI)
     function setRentPricePerDay(uint256 tokenId, uint256 pricePerDay) public {
         require(ownerOf(tokenId) == msg.sender, "Only the owner can set the rent price.");
         leasePeriods[tokenId].pricePerDay = pricePerDay;
@@ -137,7 +141,7 @@ function activateLease(uint256 tokenId) public {
         _transfer(currentOwner, originalOwner[tokenId], tokenId);  // Chuyển token về chủ sở hữu ban đầu sau khi hết hạn
     }
 
-    // Gia hạn thời gian thuê
+    // Gia hạn thời gian thuê (Chưa triển khai UI)
     function extendLease(uint256 tokenId, uint256 newEndTime) public payable {
         require(ownerOf(tokenId) == msg.sender, "Only the current tenant can extend the lease.");
         require(newEndTime > leasePeriods[tokenId].endTime, "New end time must be later than the current end time.");
