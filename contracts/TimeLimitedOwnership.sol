@@ -5,16 +5,23 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+
+
+
+
+
+
 contract TimeLimitedOwnership is ERC721Enumerable, Ownable {
     struct LeasePeriod {
         uint256 startTime;
         uint256 endTime;
-        uint256 pricePerDay; // Giá thuê mỗi ngày
+        uint256 pricePerDay; 
+        address renter; 
     }
 
     mapping(uint256 => LeasePeriod) public leasePeriods;
     mapping(uint256 => string) private _tokenURIs;
-    mapping(uint256 => address) public originalOwner; // Thêm mapping để lưu chủ sở hữu ban đầu của token
+    mapping(uint256 => address) public originalOwner; 
 
     constructor() ERC721("TimeLimitedOwnership", "TLO") {}
 
@@ -28,8 +35,11 @@ contract TimeLimitedOwnership is ERC721Enumerable, Ownable {
         originalOwner[tokenId] = to;
 
         // Đặt giá thuê mặc định theo ngày
-        leasePeriods[tokenId] = LeasePeriod(0, 0, pricePerDay);
+        leasePeriods[tokenId] = LeasePeriod(0, 0, pricePerDay, address(0));
+        
     }
+
+
 
     // Hàm lấy chủ sở hữu ban đầu của token
     function getOriginalOwner(uint256 tokenId) public view returns (address) {
@@ -62,29 +72,47 @@ contract TimeLimitedOwnership is ERC721Enumerable, Ownable {
 
     // Người thuê gọi hàm này để thuê token với thời gian sở hữu giới hạn và thanh toán theo ngày
     function rentToken(uint256 tokenId, uint256 _startTime, uint256 _endTime) public payable {
-        require(ownerOf(tokenId) != msg.sender, "You are already the owner of this token.");
-        require(_startTime < _endTime, "Start time must be before end time.");
-        require(block.timestamp <= _startTime, "Start time is in the past.");
+    require(ownerOf(tokenId) != msg.sender, "You are already the owner of this token.");
+    require(_startTime < _endTime, "Start time must be before end time.");
+    require(block.timestamp <= _startTime, "Start time is in the past.");
+    
+    // Kiểm tra nếu token đang được thuê và chưa hết hạn
+    require(leasePeriods[tokenId].endTime == 0 || block.timestamp > leasePeriods[tokenId].endTime, "Token is still rented by someone else.");
 
-        // Tính số ngày thuê
-        uint256 numberOfDays = (_endTime - _startTime) / 1 days; // Sử dụng 1 days để tính số ngày
-        require(numberOfDays > 0, "The rental period must be at least one day.");
+    // Tính số ngày thuê
+    uint256 numberOfDays = (_endTime - _startTime) / 1 days;
+    require(numberOfDays > 0, "The rental period must be at least one day.");
 
-        // Tính toán số tiền phải trả
-        uint256 totalPrice = numberOfDays * leasePeriods[tokenId].pricePerDay;
-        require(msg.value >= totalPrice, "Insufficient payment for rent.");
+    // Tính toán số tiền phải trả
+    uint256 totalPrice = numberOfDays * leasePeriods[tokenId].pricePerDay;
+    require(msg.value >= totalPrice, "Insufficient payment for rent.");
 
-        // Lưu thông tin thời gian thuê
-        leasePeriods[tokenId] = LeasePeriod(_startTime, _endTime, leasePeriods[tokenId].pricePerDay);
+    // Lưu thông tin thời gian thuê (chưa chuyển token ngay lập tức)
+    leasePeriods[tokenId] = LeasePeriod(_startTime, _endTime, leasePeriods[tokenId].pricePerDay, msg.sender);
 
-        // Chuyển token từ chủ sở hữu hiện tại sang người thuê
-        address currentOwner = ownerOf(tokenId);
-        _transfer(currentOwner, msg.sender, tokenId);
+    // Thanh toán tiền thuê cho chủ sở hữu
+    address owner = originalOwner[tokenId];
+    payable(owner).transfer(msg.value);
+}
 
-        // Thanh toán tiền thuê cho chủ sở hữu
-        address owner = originalOwner[tokenId];
-        payable(owner).transfer(msg.value);
-    }
+event LeaseActivated(uint256 tokenId, address renter);
+// Chuyển token cho người thuê khi thời gian thuê bắt đầu
+function activateLease(uint256 tokenId) public {
+    LeasePeriod memory leasePeriod = leasePeriods[tokenId];
+    require(leasePeriod.startTime != 0, "No lease has been set for this token.");
+    require(block.timestamp >= leasePeriod.startTime, "Lease period has not started yet.");
+    require(block.timestamp < leasePeriod.endTime, "Lease period has already ended.");
+    
+    address currentOwner = ownerOf(tokenId);
+    require(ownerOf(tokenId) == originalOwner[tokenId], "Token has already been transferred.");
+    // Chuyển token cho người thuê
+    _transfer(currentOwner, leasePeriod.renter, tokenId);
+
+    emit LeaseActivated(tokenId, leasePeriod.renter);
+}
+
+
+
 
     // Người thuê có thể chuyển nhượng quyền thuê cho người khác trong thời gian thuê
     function transferDuringLeasePeriod(address to, uint256 tokenId) public {
@@ -93,6 +121,7 @@ contract TimeLimitedOwnership is ERC721Enumerable, Ownable {
         
         // Chuyển token cho người nhận mới
         _transfer(msg.sender, to, tokenId);
+        leasePeriods[tokenId].renter = to;
     }
 
     // Đặt giá thuê mỗi ngày cho tài sản
