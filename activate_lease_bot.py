@@ -14,7 +14,7 @@ else:
     exit()
 
 # Địa chỉ hợp đồng và ABI
-contract_address = "0xB6Bb9985a8326e953fB0D0d6080d16fCefc6D5f2"
+contract_address = "0x8C05cF87e46c0DA3F7F0507ee273B8323C4E1762"
 
 # Đọc ABI từ file JSON
 with open('build/contracts/TimeLimitedOwnership.json', encoding='utf-8') as f:
@@ -41,7 +41,8 @@ def check_and_activate_lease():
     print(f"Tổng số token: {total_tokens}")  # In ra tổng số token được mint
 
     # Kiểm tra thời gian hiện tại của block
-    current_time = web3.eth.get_block('latest')['timestamp']
+    current_time = int(time.time())
+
     print(f"Thời gian hiện tại: {current_time}")
 
     for index in range(total_tokens):
@@ -109,7 +110,7 @@ def main():
     while True:
         print("Kiểm tra hợp đồng thuê, kích hoạt nếu cần và reclaim nếu hết hạn...")
         check_and_activate_lease()
-        time.sleep(60)  # Kiểm tra mỗi 60 giây
+        time.sleep(20)  # Kiểm tra mỗi 10 giây
 
 if __name__ == "__main__":
     main()
