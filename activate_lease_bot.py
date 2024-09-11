@@ -69,6 +69,7 @@ def check_and_activate_lease():
             print(f"Không thể lấy thông tin về token {token_id}: {e}")
             continue  # Bỏ qua token này nếu có lỗi
 
+        # Kích hoạt hợp đồng thuê nếu thời gian thuê đã bắt đầu nhưng chưa kết thúc
         if start_time <= current_time < end_time:
             print(f"Kích hoạt hợp đồng thuê cho token {token_id}")
 
@@ -84,12 +85,29 @@ def check_and_activate_lease():
                 print(f"Receipt: {receipt}")
             except Exception as e:
                 print(f"Lỗi khi kích hoạt hợp đồng thuê cho token {token_id}: {e}")
+        
+        # Tự động gọi reclaimToken nếu thời gian thuê đã kết thúc
+        elif current_time > end_time:
+            print(f"Thời gian thuê đã kết thúc cho token {token_id}, gọi reclaimToken")
+
+            try:
+                tx_hash = contract.functions.reclaimToken(token_id).transact({
+                    'from': bot_account,  # Địa chỉ gửi giao dịch là bot
+                    'gas': 2000000  # Thiết lập giới hạn gas
+                })
+                print(f"Giao dịch reclaimToken thành công với tx_hash: {tx_hash}")
+
+                # Chờ receipt của giao dịch
+                receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
+                print(f"Receipt: {receipt}")
+            except Exception as e:
+                print(f"Lỗi khi gọi reclaimToken cho token {token_id}: {e}")
 
 
 # Kiểm tra định kỳ và lắng nghe sự kiện
 def main():
     while True:
-        print("Kiểm tra hợp đồng thuê và kích hoạt nếu cần...")
+        print("Kiểm tra hợp đồng thuê, kích hoạt nếu cần và reclaim nếu hết hạn...")
         check_and_activate_lease()
         time.sleep(60)  # Kiểm tra mỗi 60 giây
 
