@@ -14,7 +14,7 @@ else:
     exit()
 
 # Địa chỉ hợp đồng và ABI
-contract_address = "0x8C05cF87e46c0DA3F7F0507ee273B8323C4E1762"
+contract_address = "0x06E4983Fb3cC5edDD9d443128677abE8afc4058b"
 
 # Đọc ABI từ file JSON
 with open('build/contracts/TimeLimitedOwnership.json', encoding='utf-8') as f:
@@ -110,7 +110,7 @@ def main():
     while True:
         print("Kiểm tra hợp đồng thuê, kích hoạt nếu cần và reclaim nếu hết hạn...")
         check_and_activate_lease()
-        time.sleep(20)  # Kiểm tra mỗi 10 giây
+        time.sleep(20)  # Kiểm tra mỗi 20 giây
 
 if __name__ == "__main__":
     main()
